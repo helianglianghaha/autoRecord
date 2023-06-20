@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>流量录制</title>
+    <script src="popup.js"></script>
+    <style>
+      .container {
+        width: 600px;
+        height: auto;
+        overflow-x: auto;
+        white-space: nowrap;
+      }
+      .content{
+        width: auto;
+        height: 100%;
+        display: inline-block;
+      }
+    </style>
+  </head>
+  <body>
+      <div class="container">
+          <div class="content">
+        <h1>Flow Recorder</h1>
+        <button id="clearButton">Clear Requests</button>
+      <button id="downloadButton">download</button>
+        <!--<div id="requestList"></div>-->
+          <table id="requestTable" >
+              <thead>
+                <tr>
+                    <th>Method</th>
+                  <th>Protocol</th>
+                  <th>Domain</th>
+
+                  <th>Route</th>
+                  <th>Result</th>
+                  <th>Details</th>
+                </tr>
+              </thead>
+              <tbody id="requestTableBody"></tbody>
+            </table>
+      </div>
+      </div>
+    </body>
+</html>
