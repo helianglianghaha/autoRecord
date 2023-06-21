@@ -1,3 +1,5 @@
+
+
 chrome.webRequest.onBeforeRequest.addListener(
   function(details) {
     if (details.url.includes('.js')) {
@@ -25,16 +27,22 @@ chrome.webRequest.onBeforeRequest.addListener(
       console.log("ICO file URL: " + details.url);
     }
     else{
-        chrome.storage.local.get("requests", function(data) {
-      var requests = data.requests || [];
-      requests.push(details);
-      chrome.storage.local.set({ "requests": requests });
-    });
+        // if(isWhitelisted(details)){
+            chrome.storage.local.get("requests", function(data) {
+                  var requests = data.requests || [];
+                  requests.push(details);
+                  chrome.storage.local.set({ "requests": requests });
+                });
+      // }else{
+      //       return { cancel: !isWhitelisted(details.url) };
+      //   }
+
     }
   },
   { urls: ["<all_urls>"] },
   ["requestBody"]
 );
+
 
 chrome.webRequest.onBeforeRequest.addListener(
   function(details) {
@@ -47,21 +55,20 @@ chrome.webRequest.onBeforeRequest.addListener(
         const decoder = new TextDecoder('utf-8');
         const requestBody = decoder.decode(details.requestBody.raw[0].bytes);
         const jsonData = JSON.parse(requestBody);
-
       var requestInfo = {
         url: details.url,
         method: details.method,
         requestHeaders: details.requestHeaders,
         requestBody: jsonData
       };
-
-      chrome.storage.local.get('requests', function(data) {
-        var requests = data.requests || [];
-        requests.push(requestInfo);
-        chrome.storage.local.set({ 'requests': requests });
-      });
-
-    }
+        // if(isWhitelisted(details.url)){
+            chrome.storage.local.get('requests', function(data) {
+            var requests = data.requests || [];
+            requests.push(requestInfo);
+            chrome.storage.local.set({ 'requests': requests });
+          });
+        }
+    // }
   },
   { urls: ['<all_urls>'] },
   ['requestBody']

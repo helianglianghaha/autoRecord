@@ -5,6 +5,16 @@ document.addEventListener('DOMContentLoaded', function() {
   var requestTableBody = document.getElementById('requestTableBody');
   var downloadButton = document.getElementById('downloadButton');
 
+  // Function to handle whitelist configuration
+function openWhitelistPopup() {
+  const whitelistWindow = window.open('whitelist.html', '_blank', 'width=400,height=300');
+
+}
+
+
+
+document.getElementById('viewWhitelistBtn').addEventListener('click', openWhitelistPopup);
+
   downloadButton.addEventListener('click',function () {
 
     chrome.storage.local.get('requests', function(data) {
@@ -13,15 +23,15 @@ document.addEventListener('DOMContentLoaded', function() {
     saveJMeterFile(jmeterXML);
   });
 
-    function saveJMeterFile(jmeterXML) {
-        const blob = new Blob([jmeterXML], { type: 'application/xml' });
+function saveJMeterFile(jmeterXML) {
+    const blob = new Blob([jmeterXML], { type: 'application/xml' });
 
-        // Prompt the user to save the file
-        const saveLink = document.createElement('a');
-        saveLink.href = URL.createObjectURL(blob);
-        saveLink.download = 'requests.jmx';
-        saveLink.click();
-      }
+    // Prompt the user to save the file
+    const saveLink = document.createElement('a');
+    saveLink.href = URL.createObjectURL(blob);
+    saveLink.download = 'requests.jmx';
+    saveLink.click();
+  }
 
     function generateJMeterXML(requests) {
 
@@ -98,7 +108,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const httpRote=getRequestRoute(request.url);
         const httpMethod=request.method;
         const httpSingleRoute=getSingleRoute(request.url);
-        if(domainList.includes(httpDomain)){
+        // if(domainList.includes(httpDomain)){
               if(httpMethod==='GET'){
                 let getXml=
                     '<HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname=\"'+httpSingleRoute+'\" enabled="true">\n' +
@@ -181,9 +191,9 @@ document.addEventListener('DOMContentLoaded', function() {
               }
 
 
-        }else{
-          continue;
-        }
+        // }else{
+        //   continue;
+        // }
       }
       let endXml='        <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="查看结果树" enabled="true">\n' +
           '          <boolProp name="ResultCollector.error_logging">false</boolProp>\n' +
@@ -236,7 +246,7 @@ document.addEventListener('DOMContentLoaded', function() {
   clearButton.addEventListener('click', function() {
     requestTable.innerHTML = '';
     chrome.storage.local.remove('requests');
-    var row = document.createElement('tr');
+      var row = document.createElement('tr');
       // var domainCell = document.createElement('td');
       // domainCell.textContent = getDomainFromUrl(request.url);
       var methodCell = document.createElement('td');
@@ -254,20 +264,23 @@ document.addEventListener('DOMContentLoaded', function() {
     renderTable(requests);
   });
 
-  function renderTable(requests) {
+
+
+function renderTable(requests) {
 
     var table = document.getElementById('requestTable');
     var tbody = table.querySelector('tbody');
     tbody.innerHTML = '';
 
     // Populate the table with requests
+  chrome.storage.local.get(['whitelist'], (result) => {
+    whitelist = result.whitelist || [];
+    // updateWhitelistDisplay();
     requests.forEach(function(request, index) {
-      const domainList=['platform.admin.qidianbox.com','platformtest.boss.qidianbox.com','platformtest.admin.qidianbox.com','platform.boss.qidianbox.com','platform.api.qidianbox.com','platformtest.api.qidianbox.com']
-      const  requestDomain=getDomainFromUrl(request.url)
-
-      if(domainList.includes(requestDomain)){
-        // Create a new row
-      var row = document.createElement('tr');
+      // if(isWhitelisted(request.url)){
+      const hostName=getDomainFromUrl(request.url)
+      if(whitelist.includes(hostName)){
+        var row = document.createElement('tr');
 
       var protocolCell = document.createElement('td');
       protocolCell.textContent = getProtocol(request.url);
@@ -286,7 +299,7 @@ document.addEventListener('DOMContentLoaded', function() {
       var detailsCell = document.createElement('td');
       var detailsButton = document.createElement('button');
 
-      detailsButton.textContent = 'Details';
+      detailsButton.textContent = '查看详情';
       detailsButton.dataset.index = index;
       detailsButton.id=""
       detailsButton.addEventListener('click', showRequestDetails);
@@ -296,12 +309,12 @@ document.addEventListener('DOMContentLoaded', function() {
       row.appendChild(protocolCell);
       row.appendChild(domainCell);
       row.appendChild(routeCell);
-      row.appendChild(resultCell);
+      // row.appendChild(resultCell);
       row.appendChild(detailsCell);
       tbody.appendChild(row);
       }
-
     });
+  });
   }
 
 

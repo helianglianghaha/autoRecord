@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Flow Recorder",
+  "name": "接口自动化录制",
   "version": "1.0",
   "description": "流量录制",
   "host_permissions": [
@@ -32,6 +32,12 @@
   "offline_enabled": true,
   "icons": {
     "16": "icon/ylyx.png"
-  }
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["whitelist.html"],
+      "matches": ["<all_urls>"]
+    }
+  ]
 }
 

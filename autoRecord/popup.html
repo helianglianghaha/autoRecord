@@ -6,7 +6,7 @@
     <script src="popup.js"></script>
     <style>
       .container {
-        width: 600px;
+        width: 650px;
         height: auto;
         overflow-x: auto;
         white-space: nowrap;
@@ -21,20 +21,18 @@
   <body>
       <div class="container">
           <div class="content">
-        <h1>Flow Recorder</h1>
-        <button id="clearButton">Clear Requests</button>
-      <button id="downloadButton">download</button>
-        <!--<div id="requestList"></div>-->
+        <h1>接口自动化录制</h1>
+        <button id="clearButton"> 清空</button>
+        <button id="downloadButton">下载接口</button>
+        <button id="viewWhitelistBtn">配置白名单</button>
           <table id="requestTable" >
               <thead>
                 <tr>
-                    <th>Method</th>
-                  <th>Protocol</th>
-                  <th>Domain</th>
-
-                  <th>Route</th>
-                  <th>Result</th>
-                  <th>Details</th>
+                    <th>请求方法</th>
+                  <th>协议</th>
+                  <th>域名</th>
+                  <th>路由</th>
+                  <th>操作</th>
                 </tr>
               </thead>
               <tbody id="requestTableBody"></tbody>
