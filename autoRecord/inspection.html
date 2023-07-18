@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+  <title>巡检列表</title>
+  <link rel="stylesheet" href="styles.css">
+    <style>
+
+        button{
+                -webkit-font-smoothing: antialiased;
+                -webkit-tap-highlight-color: transparent;
+                font-family: inherit;
+                display: inline-block;
+                line-height: 1;
+                white-space: nowrap;
+                cursor: pointer;
+                border: 1px solid #DCDFE6;
+                -webkit-appearance: none;
+                text-align: center;
+                box-sizing: border-box;
+                outline: none;
+                margin: 0;
+                transition: .1s;
+                font-weight: 500;
+                -webkit-user-select: none;
+                padding: 10px 5px;
+                font-size: 10px;
+                border-radius: 4px;
+                margin-left: 10px;
+                color: #409EFF;
+                background: #ecf5ff;
+                border-color: #b3d8ff;
+                }
+        table{
+                    font-family: Helvetica Neue,Helvetica,PingFang SC,Hiragino Sans GB,Microsoft YaHei,SimSun,sans-serif;
+                    font-weight: 400;
+                    -webkit-font-smoothing: antialiased;
+                    -webkit-tap-highlight-color: transparent;
+                    padding: 24px;
+                    width:100%;
+                    text-align:center;
+                    /*background-color:#F2F6FC;*/
+                    /*display: block;*/
+
+                    border:1px solid #EBEEF5;
+
+
+                        }
+        table thead{
+                font-family: Helvetica Neue,Helvetica,PingFang SC,Hiragino Sans GB,Microsoft YaHei,SimSun,sans-serif;
+                font-weight: 400;
+                -webkit-font-smoothing: antialiased;
+                -webkit-tap-highlight-color: transparent;
+                font-size: 14px;
+                color: #606266;
+                width: 100%;
+                overflow: hidden;
+        }
+        table tbody{
+                font-size: 75%;
+                font-family: Helvetica Neue,Helvetica,PingFang SC,Hiragino Sans GB,Microsoft YaHei,SimSun,sans-serif;
+                font-weight: 400;
+                -webkit-font-smoothing: antialiased;
+                -webkit-tap-highlight-color: transparent;
+                text-align: center;
+        }
+        table tr{
+                font-family: Helvetica Neue,Helvetica,PingFang SC,Hiragino Sans GB,Microsoft YaHei,SimSun,sans-serif;
+                font-weight: 400;
+                -webkit-font-smoothing: antialiased;
+                -webkit-tap-highlight-color: transparent;
+                font-size: 14px;
+                color: #606266;
+                border-collapse: separate;
+                background-color: #fff;
+        }
+
+    </style>
+</head>
+<body>
+    <div style="text-align:center;background-color: #409EFF;height:70px;padding:20px;">
+        <h1 style="color: white;">巡检汇总结果</h1>
+    </div>
+
+  <table id="summary-results">
+    <thead>
+      <tr>
+        <th >巡检数量</th>
+        <th>成功</th>
+        <th>失败</th>
+        <th>成功率</th>
+      </tr>
+    </thead>
+    <tbody id="summary-rows"></tbody>
+
+  </table>
+
+    <div>
+      <span>
+        <h2>巡检列表</h2>
+        <div style="float:right;">
+
+        <input type="file" id="uploadRequest" accept=".json">
+          <button style="margin-right: 10px;" id="downLoadRequest">下载接口</button>
+        </div>
+
+      </span>
+
+
+    </div>
+
+  <table id="inspection-table">
+    <thead>
+      <tr>
+        <th>请求方法</th>
+        <th>协议</th>
+        <th>域名</th>
+        <th>路由</th>
+        <th>断言</th>
+        <th>巡检结果</th>
+        <th style="text-align:center;">操作</th>
+      </tr>
+    </thead>
+    <tbody id="inspection-rows"></tbody>
+  </table>
+
+  <script src="inspection.js"></script>
+</body>
+</html>

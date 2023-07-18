@@ -11,6 +11,9 @@
     "webRequestBlocking",
     "storage",
     "tabs",
+    "scripting",
+    "declarativeNetRequest",
+    "declarativeNetRequestFeedback",
     "scripting"
   ],
   "content_scripts": [

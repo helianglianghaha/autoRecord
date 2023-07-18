@@ -5,7 +5,7 @@ let whitelist = [];
 
 // Function to handle whitelist configuration
 function configureWhitelist() {
-  const domain = prompt('添加白名单，例如：platform.api.qidianbox.com');
+  const domain = prompt('添加白名单，例如：platformtest.api.qidianbox.com');
   if (domain) {
     whitelist.push(domain);
     updateWhitelistDisplay();

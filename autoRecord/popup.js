@@ -1,17 +1,108 @@
 
 document.addEventListener('DOMContentLoaded', function() {
-  // var filterSwitch = document.getElementById('filterSwitch');
   var clearButton = document.getElementById('clearButton');
   var requestTableBody = document.getElementById('requestTableBody');
   var downloadButton = document.getElementById('downloadButton');
+  var toggleFiltering = document.getElementById('toggleFiltering');
+  var selectAllCheckbox = document.getElementById('check-all');
+  var inspections=document.getElementById('inspectionTable');
+  var joinInspection=document.getElementById('joinInspection');
+  var configNotice=document.getElementById('configNotice');
+  var clearRedis=document.getElementById('clearRedis');
+  var isFilteringEnabled = false;
+  var checkList=[]
 
-  // Function to handle whitelist configuration
+configNotice.addEventListener('click',function(){
+    configNoticeFunction();
+});
+
+function configNoticeFunction() {
+  window.open('notice.html', '_blank', 'width=800,height=400,left=800px,top=100px');
+};
+
+
+
+clearRedis.addEventListener('click',function(){
+   chrome.storage.local.remove(['requests', 'xunJianList', 'requestAfterList','requestHeaders'], function() {
+    alert('清除成功');
+    });
+});
+
+
+
+  inspections.addEventListener('click',openInspection);
+
+  function openInspection(){
+      var debugUrl = chrome.runtime.getURL('inspection.html');
+        window.open(debugUrl);
+  }
+
+  selectAllCheckbox.addEventListener('change', function(event) {
+      var checkboxes = document.querySelectorAll('tbody input[type="checkbox"]');
+      chrome.storage.local.get('requestAfterList', function(data) {
+          var afterRequest=data.requestAfterList
+          checkList=[]
+          for (var i = 0; i < checkboxes.length; i++) {
+                    checkboxes[i].checked = event.target.checked;
+                      console.log(event.target.checked)
+                      if(event.target.checked){
+                          checkList.push(afterRequest[i])
+                          }else{
+                          checkList.splice(i,1)
+                      }
+                }
+      });
+    });
+
+  joinInspection.addEventListener('click',function(){
+      if(checkList.length==0){
+          alert('请先勾选接口，再加入巡检列表')
+      }else{
+          // chrome.storage.local.set({ 'xunJianList': "" });
+          chrome.storage.local.get('xunJianList', function(data) {
+                var xunJianList = data.xunJianList || [];
+                if(xunJianList.length==0){
+                    chrome.storage.local.set({ 'xunJianList': checkList });
+                }else{
+                    for(var index in checkList){
+                        xunJianList.push(checkList[index]);
+                    }
+                    chrome.storage.local.set({ 'xunJianList': xunJianList });
+                }
+                // alert(JSON.stringify(xunJianList))
+                alert("请求成功，请查看巡检列表")
+              });
+
+
+      }
+  })
+
+
+  chrome.storage.local.get('isFilteringEnabled', function(data) {
+    var isFilteringEnabled = data.isFilteringEnabled || false;
+    toggleFiltering.checked = isFilteringEnabled;
+  });
+
+
+document.getElementById('toggleFiltering').addEventListener('change',checkChange);
+function checkChange() {
+isFilteringEnabled = toggleFiltering.checked;
+chrome.storage.local.set({ 'isFilteringEnabled': isFilteringEnabled });
+
+ chrome.storage.local.get(['whitelist','isFilteringEnabled'], (result) => {
+    whitelist = result.whitelist || [];
+    isFilteringEnabled=result.isFilteringEnabled;
+    // alert(whitelist);
+    if(whitelist.length===0 &&  isFilteringEnabled===true){
+      alert("白名单为空/没有开启录制");
+    }
+  });
+};
+
 function openWhitelistPopup() {
-  const whitelistWindow = window.open('whitelist.html', '_blank', 'width=400,height=300');
+  const whitelistWindow = window.open('whitelist.html', '_blank', 'width=800,height=400,left=800px,top=100px');
 
-}
-
-
+};
 
 document.getElementById('viewWhitelistBtn').addEventListener('click', openWhitelistPopup);
 
@@ -100,15 +191,12 @@ function saveJMeterFile(jmeterXML) {
 
       for(let i =0;i<requests.length;i++){
         const request = requests[i];
-        const domainList=['platform.admin.qidianbox.com','platformtest.boss.qidianbox.com','platformtest.admin.qidianbox.com','platform.boss.qidianbox.com','platform.api.qidianbox.com','platformtest.api.qidianbox.com']
-
         const httpProtocol=getProtocol(request.url);
         const httpDomain=getDomainFromUrl(request.url);
 
         const httpRote=getRequestRoute(request.url);
         const httpMethod=request.method;
         const httpSingleRoute=getSingleRoute(request.url);
-        // if(domainList.includes(httpDomain)){
               if(httpMethod==='GET'){
                 let getXml=
                     '<HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname=\"'+httpSingleRoute+'\" enabled="true">\n' +
@@ -144,7 +232,7 @@ function saveJMeterFile(jmeterXML) {
                     '</hashTree>\n'
                 requestXML += getXml;
 
-              }else {
+              }else{
                 const httpRespond=escapeSpecialCharacters(JSON.stringify(request.requestBody));
 
                 let postXml=
@@ -189,11 +277,6 @@ function saveJMeterFile(jmeterXML) {
                 requestXML += postXml;
 
               }
-
-
-        // }else{
-        //   continue;
-        // }
       }
       let endXml='        <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="查看结果树" enabled="true">\n' +
           '          <boolProp name="ResultCollector.error_logging">false</boolProp>\n' +
@@ -236,7 +319,6 @@ function saveJMeterFile(jmeterXML) {
           '    </hashTree>\n' +
           '  </hashTree>\n' +
           '</jmeterTestPlan>'
-
         requestXML += endXml;
         return requestXML;
       };
@@ -260,10 +342,8 @@ function saveJMeterFile(jmeterXML) {
 
   chrome.storage.local.get('requests', function(data) {
     var requests = data.requests || [];
-    // Render the table with the requests
     renderTable(requests);
   });
-
 
 
 function renderTable(requests) {
@@ -271,50 +351,111 @@ function renderTable(requests) {
     var table = document.getElementById('requestTable');
     var tbody = table.querySelector('tbody');
     tbody.innerHTML = '';
+    chrome.storage.local.get('isFilteringEnabled',(data)=>{
+      isFilteringEnabled=data.isFilteringEnabled
 
-    // Populate the table with requests
-  chrome.storage.local.get(['whitelist'], (result) => {
-    whitelist = result.whitelist || [];
-    // updateWhitelistDisplay();
-    requests.forEach(function(request, index) {
-      // if(isWhitelisted(request.url)){
-      const hostName=getDomainFromUrl(request.url)
-      if(whitelist.includes(hostName)){
-        var row = document.createElement('tr');
-
-      var protocolCell = document.createElement('td');
-      protocolCell.textContent = getProtocol(request.url);
-
-      var domainCell = document.createElement('td');
-      domainCell.textContent = getDomainFromUrl(request.url);
-
-      var methodCell = document.createElement('td');
-      methodCell.textContent = request.method;
-
-      var routeCell = document.createElement('td');
-      routeCell.textContent = getSingleRoute(request.url);
-
-      var resultCell = document.createElement('td');
-      resultCell.textContent='--'
-      var detailsCell = document.createElement('td');
-      var detailsButton = document.createElement('button');
-
-      detailsButton.textContent = '查看详情';
-      detailsButton.dataset.index = index;
-      detailsButton.id=""
-      detailsButton.addEventListener('click', showRequestDetails);
-      detailsCell.appendChild(detailsButton);
-
-      row.appendChild(methodCell);
-      row.appendChild(protocolCell);
-      row.appendChild(domainCell);
-      row.appendChild(routeCell);
-      // row.appendChild(resultCell);
-      row.appendChild(detailsCell);
-      tbody.appendChild(row);
-      }
     });
-  });
+    chrome.storage.local.get(['whitelist'], (result) => {
+    whitelist = result.whitelist || [];
+
+    if(isFilteringEnabled===false){
+      alert("没有开启录制");
+    }else if(whitelist.length===0 ){
+      alert("白名单为空，添加白名单开始录制")
+    }else{
+      // Populate the table with requests
+  chrome.storage.local.get(['whitelist'], (result) => {
+            whitelist = result.whitelist || [];
+            var requestAfterList=[]
+
+            requests.forEach(function(request, index) {
+              const hostName=getDomainFromUrl(request.url)
+              if(whitelist.includes(hostName)){
+              requestAfterList.push(request)
+              var row = document.createElement('tr');
+              var checkboxCell=document.createElement("td");
+              var checkbox = document.createElement('input');
+              checkbox.type = 'checkbox';
+
+
+              checkbox.addEventListener("change", function(event) {
+                // 触发事件处理逻辑
+                if (event.target.checked) {
+                  checkList.push(request);
+                  console.log('选中添加成功'+JSON.stringify(checkList))
+                } else {
+                  var requestId=request.requestId
+                    for(var index in checkList){
+                        if(requestId===checkList[index].requestId){
+                            checkList.splice(index, 1);
+                            console.log('删除成功'+JSON.stringify(checkList))
+                        }
+                    }
+                }
+              });
+
+
+              var protocolCell = document.createElement('td');
+              protocolCell.textContent = getProtocol(request.url);
+
+              var domainCell = document.createElement('td');
+              domainCell.textContent = getDomainFromUrl(request.url);
+
+              var methodCell = document.createElement('td');
+              methodCell.textContent = request.method;
+
+              var routeCell = document.createElement('td');
+              routeCell.textContent = getSingleRoute(request.url);
+
+              var resultCell = document.createElement('td');
+              resultCell.textContent='--'
+              var detailsCell = document.createElement('td');
+              var detailsButton = document.createElement('button');
+
+              var sendCell = document.createElement('td');
+              var sendButton = document.createElement('button');
+
+
+              checkboxCell.appendChild(checkbox);
+              sendButton.textContent='接口调试';
+              sendButton.dataset.index=index;
+              sendButton.id="sendButton";
+              sendButton.addEventListener('click',function(){
+                  openDebugPage(request);
+              });
+              sendCell.appendChild(sendButton);
+
+
+
+              detailsButton.textContent = '查看详情';
+              detailsButton.dataset.index = index;
+              detailsButton.id=""
+              detailsButton.addEventListener('click', showRequestDetails);
+              detailsCell.appendChild(detailsButton);
+
+              row.appendChild(checkboxCell);
+              row.appendChild(methodCell);
+              row.appendChild(protocolCell);
+              row.appendChild(domainCell);
+              row.appendChild(routeCell);
+              row.appendChild(sendButton);
+              row.appendChild(detailsCell);
+              tbody.appendChild(row);
+
+              }
+            });
+            chrome.storage.local.set({ 'requestAfterList': requestAfterList });
+            var checkAllCheckbox = document.getElementById("check-all");
+            var checkboxes = document.querySelectorAll("#requests-body input[type='checkbox']");
+
+              checkAllCheckbox.addEventListener("change", function(event) {
+                checkboxes.forEach(function(checkbox){
+                  checkbox.checked = event.target.checked;
+                });
+              });
+          });
+        }
+      });
   }
 
 
@@ -362,6 +503,28 @@ function renderTable(requests) {
     return route;
   }
 
+  function openDebugPage(request) {
+        var debugUrl = chrome.runtime.getURL('debug.html');
+        var queryParams = new URLSearchParams();
+      if(request.method==="GET"){
+        queryParams.set('data', JSON.stringify(request));
+        debugUrl += '?' + queryParams.toString();
+        window.open(debugUrl);
+  }
+      else{
+        chrome.storage.local.remove('postRequestData', function() {
+              console.log('postRequestData successfully removed');
+            });
+        localStorage.setItem("postRequestData", JSON.stringify(request));
+        queryParams.set('data', JSON.stringify(request.method));
+        debugUrl += '?' + queryParams.toString();
+        window.open(debugUrl);
+
+
+      }
+
+
+  }
 
   function showRequestDetails(event) {
         var index = parseInt(event.target.dataset.index);
@@ -369,7 +532,7 @@ function renderTable(requests) {
           var requests = data.requests || [];
           var request = requests[index];
 
-          alert('Request Details:\n\n' + JSON.stringify(request));
+          alert('Response:\n\n' + JSON.stringify(request,null,2));
         });
       }
 

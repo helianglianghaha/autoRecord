@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta charset="UTF-8">
+    <title>接口调试</title>
+
+    <style>
+      label {
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-end;
+        align-items: center;
+        margin-bottom: 10px;
+          margin-right:10px;
+          width:100%;
+          font-size:14px;
+      }
+      label [type="text"]{
+          width:30px;
+          font-size:14px;
+
+      }
+      label span {
+        margin-right: 10px;
+      }
+      input[type="text"]{
+          width:95%;
+          border:0px;
+      }
+      textarea {
+        text-align: left;
+        width: 95%;
+          height:200px;
+          border:0px;
+      }
+      button {
+        margin-top: 10px;
+          margin-bottom:10px;
+          width:100%;
+          height:50px;
+      }
+    </style>
+  </head>
+  <body style="background-color: #EBEEF5;">
+    <div style="text-align:center;">
+         <h1>接口调试</h1>
+    </div>
+
+    <button id="debug" style="color:white;background-color:#409EFF;border:0px;">发送</button>
+
+    <form id="debugForm">
+        <label>
+            <div style="width:60px;">
+                协议
+            </div>
+
+        <input    type="text" name="method" required>
+      </label>
+      <label >
+        <div style="width:60px;">
+             URL地址
+            </div>
+        <input  type="text" name="url" required>
+      </label>
+
+      <label >
+        <div style="width:60px;">
+                请求头
+            </div>
+        <textarea  name="headers"></textarea>
+      </label>
+      <label>
+        <div style="width:60px;">
+                请求体
+            </div>
+        <textarea  name="body"></textarea>
+      </label>
+        <label>
+        <div style="width:60px;">
+                返回值
+            </div>
+        <textarea style="height:500px;"  name="response"></textarea>
+      </label>
+
+    </form>
+
+    <script src="debug.js"></script>
+    <script src="axios.js"></script>
+
+  </body>
+</html>
