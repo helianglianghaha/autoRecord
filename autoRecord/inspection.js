@@ -175,20 +175,26 @@ function configAssertFirst(requestData){
                           ">url:"+url+"\n"+
                           ">断言值:"+assertData+"\n"+
                           ">返回值:"+JSON.stringify(xhr.responseText))
-
+                        console.log("post请求"+JSON.stringify(requestData))
                       chrome.storage.local.get('xunJianList', function(data) {
                       var xunJianList = data.xunJianList || [];
                       xunJianList[requestData.afindex].result = "Fail";
                       chrome.storage.local.set({ xunJianList: xunJianList }, function() {
-                        console.log("执行成功");
+                        // console.log("执行成功");
                       });
                       renderInspections(xunJianList)
                     });
-                      console.log("requestList",requestList)
+                      // console.log("requestList",requestList)
                       sendNotificationToRobot(message)
                   }
               } else {
-                console.log('>接口请求出错: \n'+JSON.stringify(xhr.responseText));
+                var message=("接口请求异常,断言信息不在返回值中 \n"+
+                               ">请求方法:"+method+"\n"+
+                               ">URL:"+url+"\n"+
+                               ">Body:"+body+"\n"+
+                               ">断言值:"+assertData+"\n"+
+                               ">返回值:"+JSON.stringify(xhr.responseText))
+                sendNotificationToRobot(message)
               }
             }
           };
@@ -211,34 +217,37 @@ function configAssertFirst(requestData){
                               var xunJianList = data.xunJianList || [];
                               xunJianList[requestData.afindex].result = "Success";
                               chrome.storage.local.set({ xunJianList: xunJianList }, function() {
-                                console.log("执行成功");
                               });
+                              console.log("post执行成功"+JSON.stringify(xunJianList[requestData.afindex]))
                               renderInspections(xunJianList)
                         });
-                            console.log("requestList",requestList)
                             console.log("执行成功")
                       }else{
-                           var message=("出BUG了,断言信息不在返回值中 \n"+
+                           var message=("接口请求异常,断言信息不在返回值中 \n"+
                                ">请求方法:"+method+"\n"+
                                ">URL:"+url+"\n"+
                                ">Body:"+body+"\n"+
                                ">断言值:"+assertData+"\n"+
                                ">返回值:"+JSON.stringify(xhr.responseText))
+
+                            sendNotificationToRobot(message)
+                            chrome.storage.local.get('xunJianList', function(data) {
+                              var xunJianList = data.xunJianList || [];
+                              xunJianList[requestData.afindex].result = "Fail";
+                              console.log("异常POST"+JSON.stringify( xunJianList[requestData.afindex]))
+                              chrome.storage.local.set({ xunJianList: xunJianList }, function() {
+                              });
+                              renderInspections(xunJianList)
+                            });
                         }
-                        sendNotificationToRobot(message)
-                        chrome.storage.local.get('xunJianList', function(data) {
-                          var xunJianList = data.xunJianList || [];
-                          xunJianList[requestData.afindex].result = "Fail";
-                          chrome.storage.local.set({ xunJianList: xunJianList }, function() {
-                            console.log("执行成功");
-                          });
-                          renderInspections(xunJianList)
-
-                        });
-
                       } else {
-                        var failMessage=('>接口请求出错: \n'+JSON.stringify(xhr.responseText));
-                        sendNotificationToRobot(failMessage)
+                        var message=("接口请求异常,断言信息不在返回值中 \n"+
+                               ">请求方法:"+method+"\n"+
+                               ">URL:"+url+"\n"+
+                               ">Body:"+body+"\n"+
+                               ">断言值:"+assertData+"\n"+
+                               ">返回值:"+JSON.stringify(xhr.responseText))
+                        sendNotificationToRobot(message)
                       }
                     }
                   };
@@ -352,9 +361,11 @@ function renderInspections(xunJianList) {
     resultCell.textContent = inspection.result || "未执行";
     if(inspection.result==="Success"){
         resultCell.style.color="#67C23A"
-    }else{
-        resultCell.style.color="red"
     }
+    if(inspection.result==="Fail"){
+        row.style.color="red"
+    }
+
     row.appendChild(resultCell);
 
     var actionCell = document.createElement('td');
@@ -383,6 +394,9 @@ function renderInspections(xunJianList) {
 
     var cancelButton = document.createElement('button');
     cancelButton.textContent = '删除';
+    cancelButton.style.background='#F56C6C';
+    cancelButton.style.color='white';
+    cancelButton.style.border='0px solid #dcdfe6;'
     cancelButton.dataset.index=index;
     cancelButton.id="delButton";
     cancelButton.addEventListener('click',deleteRequest);
@@ -399,17 +413,23 @@ function renderInspections(xunJianList) {
 function updateSummary() {
       tbodySummary.innerHTML = '';
       var count = 0;
+        var failCount=0;
+        var undoCont=0;
         chrome.storage.local.get('xunJianList', function(data) {
         for (var i = 0; i < data.xunJianList.length; i++) {
           if (data.xunJianList[i].result === "Success") {
             count++;
+          }else if(data.xunJianList[i].result === "Fail"){
+            failCount++;
+          }else{
+              undoCont++;
           }
         }
 
       var totalCount = data.xunJianList.length;
       var successCount = count
-      var failureCount = totalCount - successCount;
-      var successRate = successCount / totalCount * 100+"%";
+      var failureCount = failCount;
+      var successRate = (successCount / totalCount * 100).toFixed(2)+"%";
 
         var row = document.createElement('tr');
 
@@ -533,31 +553,7 @@ function escapeSpecialCharacters(str) {
     }
 
 
-// 更新巡检汇总结果
-function updateSummaryResults() {
-    var count = 0;
-    chrome.storage.local.get('xunJianList', function(data) {
-    for (var i = 0; i < data.xunJianList.length; i++) {
-      if (data.xunJianList[i].result === "Success") {
-        count++;
-      }
-    }
-    // console.log(count)
 
-      var totalCount = data.xunJianList.length;
-      var successCount = count
-      var failureCount = totalCount - successCount;
-      var successRate = (successCount / totalCount * 100).toFixed(1);
-        console.log(totalCount)
-        console.log(successCount)
-        console.log(failureCount)
-        console.log(successRate)
-      totalCountSpan.textContent = totalCount;
-      successCountSpan.textContent = successCount;
-      failureCountSpan.textContent = failureCount;
-      successRateSpan.textContent = successRate.toFixed(2) + '%';
-    })
-}
 
 // 取消巡检按钮点击事件处理函数
 function handleCancelInspection(event) {

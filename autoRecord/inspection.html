@@ -31,6 +31,9 @@
                 background: #ecf5ff;
                 border-color: #b3d8ff;
                 }
+        button[text='删除']{
+          border: 0px solid #DCDFE6;
+        }
         table{
                     font-family: Helvetica Neue,Helvetica,PingFang SC,Hiragino Sans GB,Microsoft YaHei,SimSun,sans-serif;
                     font-weight: 400;
@@ -74,6 +77,47 @@
                 border-collapse: separate;
                 background-color: #fff;
         }
+      input[type='file']{
+            -webkit-font-smoothing: antialiased;
+            -webkit-tap-highlight-color: transparent;
+            font-family: inherit;
+            line-height: 1;
+            white-space: nowrap;
+            cursor: pointer;
+            text-align: center;
+            font-weight: 500;
+            -webkit-user-select: none;
+            color: #fff;
+            font-size: 12px;
+      }
+      /* 隐藏原始的文件上传控件 */
+      #uploadRequest {
+        display: none;
+      }
+
+      /* 自定义样式的外层标签样式 */
+      .custom-file-upload {
+        display: inline-block;
+        padding: 7px 5px;
+        border: 1px solid #b3d8ff;
+        border-radius: 6px;
+        background-color: #b3d8ff;
+        cursor: pointer;
+        color:#409EFF;
+        background: #ecf5ff;
+      }
+
+      /* 自定义选择文件按钮样式 */
+      .custom-file-upload span {
+        font-size: 10px;
+        /*font-weight: bold;*/
+      }
+
+      /* 鼠标悬停时添加一些样式 */
+      .custom-file-upload:hover {
+        background-color: #e0e0e0;
+      }
+
 
     </style>
 </head>
@@ -95,17 +139,16 @@
 
   </table>
 
-    <div>
-      <span>
+    <div style="display:flex;">
         <h2>巡检列表</h2>
-        <div style="float:right;">
+        <div style="margin-left:auto;margin-top: 10px;">
+          <label for="uploadRequest" class="custom-file-upload">
+            <span>请上传Json文件</span>
+            <input type="file" id="uploadRequest" accept=".json">
+          </label>
 
-        <input type="file" id="uploadRequest" accept=".json">
-          <button style="margin-right: 10px;" id="downLoadRequest">下载接口</button>
+          <button style="margin-right: 10px;margin-left:20px;" id="downLoadRequest">下载巡检Json文件</button>
         </div>
-
-      </span>
-
 
     </div>
 
